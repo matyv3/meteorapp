@@ -1,31 +1,22 @@
-import ResolutionsSchema from '../../api/resolutions/Resolutions.graphql';
-import { createApolloServer } from 'meteor/apollo';
-import { makeExecutableSchema } from 'graphql-tools';
-import ResolutionsResolvers from '../../api/resolutions/resolvers';
-import merge from 'lodash/merge';
+import { createApolloServer } from "meteor/apollo";
+import { makeExecutableSchema } from "graphql-tools";
+import merge from "lodash/merge";
 
-const testSchema = `
-	type Query {
-		test: String
-		resolutions: [Resolution]
-	}
-`;
-// hdp
-const resolver = {
-	Query: {
-		test() {
-			return 'test message';
-		}
-	}
-};
+import ResolutionsResolvers from "../../api/resolutions/resolvers";
+import ResolutionsSchema from "../../api/resolutions/Resolutions.graphql";
+import UsersSchema from "../../api/users/User.graphql";
+import UsersResolvers from "../../api/users/resolvers";
+import GoalsSchema from "../../api/goals/Goal.graphql";
+import GoalsResolvers from "../../api/goals/resolvers";
 
-const resolvers = merge(resolver, ResolutionsResolvers);
+// modifar este comentario ra que meteor le asdsa asdade bola a los cambios en los archivos .graphql
+const typeDefs = [ResolutionsSchema, UsersSchema, GoalsSchema];
 
-const typeDefs = [ testSchema, ResolutionsSchema ];
+const resolvers = merge(ResolutionsResolvers, UsersResolvers, GoalsResolvers);
 
 const schema = makeExecutableSchema({
-	typeDefs,
-	resolvers
+  typeDefs,
+  resolvers
 });
 
 createApolloServer({ schema });

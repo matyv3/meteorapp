@@ -1,45 +1,66 @@
-import React from 'react';
-import gql from 'graphql-tag';
-import { graphql } from 'react-apollo';
-import { Accounts } from 'meteor/accounts-base';
-import { withApollo } from 'react-apollo';
-import ResolutionForm from './ResolutionForm';
-import RegisterForm from './RegisterForm';
-import LoginForm from './LoginForm';
+import React from "react";
+import gql from "graphql-tag";
+import { graphql } from "react-apollo";
+import { Accounts } from "meteor/accounts-base";
+import { withApollo } from "react-apollo";
+import ResolutionForm from "./ResolutionForm";
 
-const App = ({ loading, resolutions, client }) => {
-	if (loading) return null;
+import GoalForm from "./GoalForm";
+import Goal from "./resolutions/Goal";
+import UserForm from "./UserForm";
 
-	return (
-		<div>
-			<button
-				onClick={() => {
-					Meteor.logout();
-					client.resetStore();
-				}}
-			>
-				Logout
-			</button>
-			<RegisterForm client={client} />
-			<LoginForm client={client} />
-			<ResolutionForm />
-			{resolutions.map((resolution) => <li key={resolution._id}>{resolution.name}</li>)}
-		</div>
-	);
+const App = ({ loading, resolutions, client, user }) => {
+  if (loading) return null;
+
+  return (
+    <div>
+      <UserForm user={user} client={client} />
+      {user && <ResolutionForm />}
+      {user && (
+        <ul>
+          {resolutions.map(resolution => (
+            <li key={resolution._id}>
+              <span
+                style={{
+                  textDecoration: resolution.completed ? "line-through" : "none"
+                }}
+              >
+                {resolution.name}
+              </span>
+              <ul>
+                {resolution.goals.map(goal => (
+                  <Goal goal={goal} key={goal._id} />
+                ))}
+              </ul>
+              <GoalForm resolutionId={resolution._id} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 };
-
+// sarasa
 const resolutionsQuery = gql`
-	query Resolutions {
-		test
-		resolutions {
-			_id
-			name
-		}
-	}
+  query Resolutions {
+    resolutions {
+      _id
+      name
+      completed
+      goals {
+        _id
+        name
+        completed
+      }
+    }
+    user {
+      _id
+    }
+  }
 `;
 
 export default graphql(resolutionsQuery, {
-	props: ({ data }) => ({ ...data })
+  props: ({ data }) => ({ ...data })
 })(withApollo(App));
 
 // igual a lo de abajo
